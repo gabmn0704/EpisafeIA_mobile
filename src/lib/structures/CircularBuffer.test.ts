@@ -39,6 +39,14 @@ describe('CircularBuffer', () => {
     expect(b.drain(-1)).toEqual([]);
   });
 
+  it('peek copies the oldest items without removing them', () => {
+    const b = new CircularBuffer<number>(3);
+    [1, 2, 3, 4].forEach((n) => b.push(n));
+    expect(b.peek(2)).toEqual([2, 3]);
+    expect(b.size).toBe(3);
+    expect(b.peek(99)).toEqual([2, 3, 4]);
+  });
+
   it('clear resets state and invalid capacity throws', () => {
     const b = new CircularBuffer<number>(2);
     b.push(1);

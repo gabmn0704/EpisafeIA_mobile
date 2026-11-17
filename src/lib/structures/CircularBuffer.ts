@@ -51,6 +51,14 @@ export class CircularBuffer<T> {
     return this.count === 0 ? undefined : this.data[this.start];
   }
 
+  /** Copia los n elementos mas antiguos sin quitarlos. */
+  peek(n: number = this.count): T[] {
+    const take = Math.min(Math.max(0, n), this.count);
+    const out: T[] = [];
+    for (let i = 0; i < take; i++) out.push(this.data[(this.start + i) % this.capacity] as T);
+    return out;
+  }
+
   /** Extrae y devuelve los n elementos mas antiguos (para enviarlos por lotes). */
   drain(n: number = this.count): T[] {
     const take = Math.min(Math.max(0, n), this.count);
