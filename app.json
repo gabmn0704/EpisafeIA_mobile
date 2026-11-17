@@ -70,7 +70,8 @@
       ]
     ],
     "extra": {
-      "eas": {}
-    }
+      "eas": { "projectId": "21065e5c-9c93-4295-957e-76a2930ebe7c" }
+    },
+    "owner": "gabmnn"
   }
 }
