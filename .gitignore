@@ -14,3 +14,5 @@ coverage/
 *.apk
 *.ipa
 *.aab
+.eslintcache
+.tscache
