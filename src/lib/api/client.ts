@@ -5,7 +5,7 @@ import type { Tokens } from './tokenStore';
 export interface ApiClientDeps {
   baseUrl: string;
   getTokens: () => Tokens | null;
-  /** Llamado cuando el refresh produce tokens nuevos (o null si la sesion murio). */
+  /** Llamado cuando el refresh produce tokens nuevos (o null si la sesión murió). */
   setTokens: (tokens: Tokens | null) => void | Promise<void>;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
@@ -79,14 +79,14 @@ export class ApiClient {
         signal: controller.signal,
       });
     } catch (e) {
-      if (e instanceof Error && e.name === 'AbortError') throw new ApiError(0, 'TIMEOUT', 'El servidor tardo demasiado en responder.');
+      if (e instanceof Error && e.name === 'AbortError') throw new ApiError(0, 'TIMEOUT', 'El servidor tardó demasiado en responder.');
       throw new ApiError(0, 'NETWORK_ERROR', 'No se pudo conectar con el servidor.');
     } finally {
       clearTimeout(timer);
     }
   }
 
-  /** Una sola renovacion en vuelo, aunque fallen varias peticiones a la vez. */
+  /** Una sola renovación en vuelo, aunque fallen varias peticiones a la vez. */
   private refreshOnce(): Promise<boolean> {
     if (!this.refreshing) {
       this.refreshing = this.refresh().finally(() => {
@@ -103,7 +103,7 @@ export class ApiClient {
       const res = await this.send('POST', '/auth/refresh', { body: { refreshToken: current.refreshToken } }, false);
       if (!res.ok) throw new Error('refresh rechazado');
       const data = (await res.json()) as Partial<Tokens>;
-      if (!data.accessToken || !data.refreshToken) throw new Error('respuesta de refresh invalida');
+      if (!data.accessToken || !data.refreshToken) throw new Error('respuesta de refresh inválida');
       await this.deps.setTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
       return true;
     } catch (e) {
@@ -131,7 +131,7 @@ export class ApiClient {
     if (!schema) return body as T;
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
-      throw new ApiError(res.status, 'INVALID_RESPONSE', 'El servidor respondio con un formato inesperado.', parsed.error.issues);
+      throw new ApiError(res.status, 'INVALID_RESPONSE', 'El servidor respondió con un formato inesperado.', parsed.error.issues);
     }
     return parsed.data;
   }

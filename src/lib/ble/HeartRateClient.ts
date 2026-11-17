@@ -83,8 +83,8 @@ export class HeartRateClient {
     const power = await this.opts.transport.powerState();
     if (power !== 'on') {
       const msg: Record<string, string> = {
-        off: 'El Bluetooth esta apagado. Enciendelo para buscar tu reloj.',
-        unauthorized: 'EpiSafe no tiene permiso de Bluetooth. Activalo en los ajustes del telefono.',
+        off: 'El Bluetooth está apagado. Enciéndelo para buscar tu reloj.',
+        unauthorized: 'EpiSafe no tiene permiso de Bluetooth. Actívalo en los ajustes del teléfono.',
         unsupported: 'Este dispositivo no soporta Bluetooth de bajo consumo.',
         unknown: 'No se pudo leer el estado del Bluetooth.',
       };
@@ -138,7 +138,7 @@ export class HeartRateClient {
     this.disconnectSub = this.opts.transport.onDisconnected(device.id, () => {
       if (this.userDisconnected) return;
       this.teardownSubscriptions();
-      this.scheduleReconnect(device, 'Se perdio la conexion con el reloj');
+      this.scheduleReconnect(device, 'Se perdió la conexión con el reloj');
     });
     this.monitorSub = this.opts.transport.monitorHeartRate(
       device.id,

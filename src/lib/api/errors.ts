@@ -29,14 +29,14 @@ export class ApiError extends Error {
 /** Mensaje en espanol apto para mostrar al usuario. */
 export function friendlyMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.code === 'NETWORK_ERROR') return 'No se pudo conectar con el servidor. Revisa tu red y la direccion del API.';
-    if (error.code === 'TIMEOUT') return 'El servidor tardo demasiado en responder.';
+    if (error.code === 'NETWORK_ERROR') return 'No se pudo conectar con el servidor. Revisa tu red y la dirección del API.';
+    if (error.code === 'TIMEOUT') return 'El servidor tardó demasiado en responder.';
     if (error.code === 'RATE_LIMITED') return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
-    if (error.code === 'UNAUTHORIZED') return error.message || 'Tu sesion expiro. Inicia sesion otra vez.';
-    return error.message || 'Ocurrio un error inesperado.';
+    if (error.code === 'UNAUTHORIZED') return error.message || 'Tu sesión expiró. Inicia sesión otra vez.';
+    return error.message || 'Ocurrió un error inesperado.';
   }
   if (error instanceof Error) return error.message;
-  return 'Ocurrio un error inesperado.';
+  return 'Ocurrió un error inesperado.';
 }
 
 export function isApiErrorBody(body: unknown): body is { error: { code?: string; message?: string; details?: unknown } } {
