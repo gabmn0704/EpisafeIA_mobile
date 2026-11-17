@@ -6,6 +6,8 @@ module.exports = [
   {
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Reanimated muta sharedValue.value por diseno; la regla del React Compiler no lo entiende.
+      'react-hooks/immutability': 'off',
     },
   },
 ];
