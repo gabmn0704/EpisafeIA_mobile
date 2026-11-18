@@ -8,6 +8,17 @@ Consume el API de `EpisafeIa_back` (contrato en `docs/API.md` de ese repo) y reu
 
 Onboarding, login/registro, Dashboard (medidor de riesgo animado, factores, pulso, adherencia, racha), registro diario (con deshacer), medicamentos (agenda, marcar toma, recordatorios locales), crisis (línea de tiempo y alta manual), **emergencia** (cuenta atrás cancelable, ubicación, llamada a contacto), insights de IA, contactos, reloj/dispositivos y ajustes.
 
+## Funciones extra
+
+- **Cola offline** (`src/lib/offlineQueue.ts`): si falla la red al guardar una crisis, un registro diario o una toma de medicación, se guarda en AsyncStorage (una cola por usuario) y se reintenta cada 20 s y al volver a la app. Un aviso ámbar "N registros pendientes de enviar" aparece en las pantallas y permite reintentar a mano. Los rechazos 4xx se descartan; red y 5xx se reintentan.
+- **Recordatorios de medicación**: notificaciones locales diarias por horario, canal Android, permiso pedido con explicación previa, botones "Ya la tomé" y "Recordar en 10 min" (la app se abre un instante para registrar la toma) y reprogramación al editar o borrar medicamentos.
+- **Ficha médica de emergencia** (`/medical-id`): alergias, grupo sanguíneo, condiciones e indicaciones (solo en el teléfono, no hay endpoint en el API) más medicación y contactos copiados del API para verlos sin red. Accesible desde la pantalla de emergencia y sin desbloquear la app.
+- **Bloqueo con huella/rostro/PIN** (Ajustes): desactivado por defecto. Pide desbloqueo al abrir y tras 30 s en segundo plano. La emergencia y la ficha médica quedan abiertas.
+- **Reporte para el médico** (`/report`): crisis, desencadenantes frecuentes, medicación y adherencia, y hábitos de un periodo; se comparte como PDF (`expo-print` + `expo-sharing`) o texto.
+- **Calendario de crisis** (`/calendar`): vista mensual con los días con crisis marcados y detalle al tocar un día.
+
+Todo funciona en Expo Go.
+
 ## Requisitos
 
 - Node 20+ y npm.

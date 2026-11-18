@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView, StyleSheet, View, type ViewStyle } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, space } from '@/theme/tokens';
 import { Glow } from './Glow';
+import { PendingSyncBanner } from './PendingSyncBanner';
 
 export interface ScreenProps {
   children: ReactNode;
@@ -39,6 +40,7 @@ export function Screen({ children, scroll = true, refreshing, onRefresh, bottomI
             onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={colors.lime} colors={[colors.lime]} /> : undefined
           }
         >
+          <PendingSyncBanner />
           {children}
         </ScrollView>
       ) : (

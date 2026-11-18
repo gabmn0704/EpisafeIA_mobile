@@ -5,7 +5,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
+import { useReminderActions } from '@/hooks/useReminderActions';
+import { AppLockProvider } from '@/providers/AppLockProvider';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { WearableProvider } from '@/providers/WearableProvider';
@@ -26,6 +29,9 @@ function Routes() {
         <Stack.Screen name="insights" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="contacts" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="devices" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="medical-id" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="report" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="calendar" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="medication-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="seizure-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
@@ -42,6 +48,7 @@ function Routes() {
 function Shell() {
   const fontsReady = useAppFonts();
   const { status } = useAuth();
+  useReminderActions();
   const ready = fontsReady && status !== 'loading';
 
   useEffect(() => {
@@ -52,9 +59,11 @@ function Shell() {
   return (
     <>
       <StatusBar style="light" />
-      <WearableProvider>
-        <Routes />
-      </WearableProvider>
+      <AppLockProvider>
+        <WearableProvider>
+          <Routes />
+        </WearableProvider>
+      </AppLockProvider>
     </>
   );
 }
@@ -65,9 +74,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>
-              <Shell />
-            </ToastProvider>
+            <OfflineQueueProvider>
+              <ToastProvider>
+                <Shell />
+              </ToastProvider>
+            </OfflineQueueProvider>
           </AuthProvider>
         </QueryProvider>
       </SafeAreaProvider>
