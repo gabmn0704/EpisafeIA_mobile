@@ -53,6 +53,12 @@ function Shell() {
     if (fontsReady) SplashScreen.hideAsync().catch(() => undefined);
   }, [fontsReady]);
 
+  // Seguro: si la animación nativa no avisa que terminó, la capa de entrada (zIndex alto) taparía los toques.
+  useEffect(() => {
+    const id = setTimeout(finishIntro, 3500);
+    return () => clearTimeout(id);
+  }, [finishIntro]);
+
   if (!fontsReady) return null;
   return (
     <>

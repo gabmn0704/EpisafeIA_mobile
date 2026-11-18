@@ -17,9 +17,11 @@ const BAR_MARGIN = 14;
 interface TabItemProps extends TabTriggerSlotProps {
   icon: IconName;
   label: string;
+  /** Ruta a la que navega esta pestaña (respaldo si el disparador del router no responde). */
+  to: '/' | '/medications' | '/crisis' | '/more';
 }
 
-function TabItem({ icon, label, isFocused, onPress, ...rest }: TabItemProps) {
+function TabItem({ icon, label, to, isFocused, onPress, ...rest }: TabItemProps) {
   const on = useSharedValue(isFocused ? 1 : 0);
   useEffect(() => {
     on.value = withSpring(isFocused ? 1 : 0, { damping: 16, stiffness: 240 });
@@ -32,6 +34,7 @@ function TabItem({ icon, label, isFocused, onPress, ...rest }: TabItemProps) {
       onPress={(e) => {
         haptic.select();
         onPress?.(e);
+        if (!isFocused) router.navigate(to);
       }}
       accessibilityRole="tab"
       accessibilityState={{ selected: !!isFocused }}
@@ -61,17 +64,17 @@ export default function TabsLayout() {
       <View style={styles.bar}>
         <TabList style={styles.list}>
           <TabTrigger name="index" href="/" asChild>
-            <TabItem icon="home" label="Inicio" />
+            <TabItem to="/" icon="home" label="Inicio" />
           </TabTrigger>
           <TabTrigger name="medications" href="/medications" asChild>
-            <TabItem icon="pill" label="Medicinas" />
+            <TabItem to="/medications" icon="pill" label="Medicinas" />
           </TabTrigger>
           <View style={styles.spacer} />
           <TabTrigger name="crisis" href="/crisis" asChild>
-            <TabItem icon="activity" label="Crisis" />
+            <TabItem to="/crisis" icon="activity" label="Crisis" />
           </TabTrigger>
           <TabTrigger name="more" href="/more" asChild>
-            <TabItem icon="menu" label="Más" />
+            <TabItem to="/more" icon="menu" label="Más" />
           </TabTrigger>
         </TabList>
       </View>
