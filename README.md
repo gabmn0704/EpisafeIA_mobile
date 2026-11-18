@@ -6,7 +6,7 @@ Consume el API de `EpisafeIa_back` (contrato en `docs/API.md` de ese repo) y reu
 
 ## Pantallas
 
-Onboarding, login/registro, Dashboard (medidor de riesgo animado, factores, pulso, adherencia, racha), registro diario (con deshacer), medicamentos (agenda, marcar toma, recordatorios locales), crisis (línea de tiempo y alta manual), **emergencia** (cuenta atrás cancelable, ubicación, llamada a contacto), insights de IA, contactos, reloj/dispositivos y ajustes.
+Onboarding, login/registro, Dashboard (medidor de riesgo animado, factores, pulso, adherencia, racha), registro diario (con deshacer), medicamentos (agenda, marcar toma, recordatorios locales), crisis (línea de tiempo y alta manual), **emergencia** (cuenta atrás cancelable, ubicación, lista de todos tus contactos con Llamar, SMS y WhatsApp), insights de IA, contactos, reloj/dispositivos y ajustes.
 
 ## Requisitos
 
@@ -32,7 +32,6 @@ Variables disponibles (todas públicas, **no pongas secretos**):
 | Variable | Uso |
 | --- | --- |
 | `EXPO_PUBLIC_API_URL` | URL base del API, incluyendo `/api/v1`. |
-| `EXPO_PUBLIC_EMERGENCY_NUMBER` | Número local de emergencias para el botón de llamada (por defecto `123`). Cámbialo según tu país. |
 
 ## Reloj y Bluetooth (requiere development build)
 
