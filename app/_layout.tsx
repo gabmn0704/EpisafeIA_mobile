@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
+import { WakeOverlay } from '@/components/ui/WakeOverlay';
 import { SosFloat } from '@/components/ui/SosFloat';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -54,6 +55,7 @@ function Shell() {
       <StatusBar style="light" />
       <Routes />
       <SosFloat />
+      <WakeOverlay />
     </>
   );
 }
