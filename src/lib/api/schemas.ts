@@ -70,10 +70,16 @@ export type DashboardSummary = z.infer<typeof dashboardSchema>;
 export const medicationStatusSchema = z.enum(['taken', 'missed', 'skipped', 'pending']);
 export type MedicationStatus = z.infer<typeof medicationStatusSchema>;
 
+/** El API en produccion devuelve la dosis como numero (NUMERIC) y en memoria como texto: se normaliza a texto. */
+const doseSchema = z
+  .union([z.string(), z.number()])
+  .nullable()
+  .transform((v) => (v === null ? null : String(v)));
+
 export const medicationSchema = z.object({
   id: z.string(),
   name: z.string(),
-  dose: z.string().nullable(),
+  dose: doseSchema,
   unit: z.string().nullable(),
   scheduleTimes: z.array(z.string()),
   active: z.boolean(),
@@ -86,7 +92,7 @@ export const medicationResponseSchema = z.object({ medication: medicationSchema 
 export const scheduledDoseSchema = z.object({
   medicationId: z.string(),
   name: z.string(),
-  dose: z.string().nullable(),
+  dose: doseSchema,
   unit: z.string().nullable(),
   scheduledFor: z.string(),
   status: medicationStatusSchema,
