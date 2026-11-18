@@ -41,3 +41,31 @@ export function staleReminderIds(scheduledIds: readonly string[], desired: reado
   const keep = new Set(desired.map((d) => d.id));
   return scheduledIds.filter((id) => id.startsWith(REMINDER_PREFIX) && !keep.has(id));
 }
+
+export const REMINDER_CATEGORY = 'med-reminder';
+export const ACTION_TAKEN = 'taken';
+export const ACTION_SNOOZE = 'snooze';
+export const SNOOZE_MINUTES = 10;
+
+export interface ReminderData {
+  kind: 'medication';
+  medicationId: string;
+  hour: number;
+  minute: number;
+}
+
+/** Valida los datos que viajan dentro de la notificación (llegan como unknown). */
+export function parseReminderData(data: unknown): ReminderData | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const d = data as Record<string, unknown>;
+  if (d.kind !== 'medication' || typeof d.medicationId !== 'string') return null;
+  if (typeof d.hour !== 'number' || typeof d.minute !== 'number') return null;
+  return { kind: 'medication', medicationId: d.medicationId, hour: d.hour, minute: d.minute };
+}
+
+/** Instante ISO de la dosis de hoy a esa hora local: identifica la toma que se confirma. */
+export function doseScheduledFor(hour: number, minute: number, now: Date = new Date()): string {
+  const d = new Date(now);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}

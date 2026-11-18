@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
+import { useReminderActions } from '@/hooks/useReminderActions';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -44,6 +45,7 @@ function Routes() {
 function Shell() {
   const fontsReady = useAppFonts();
   const { status } = useAuth();
+  useReminderActions();
   const ready = fontsReady && status !== 'loading';
 
   useEffect(() => {

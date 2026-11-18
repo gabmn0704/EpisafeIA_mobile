@@ -1,5 +1,5 @@
 import type { Medication } from '@/lib/api/schemas';
-import { buildDailyReminders, REMINDER_PREFIX, staleReminderIds } from './reminders';
+import { buildDailyReminders, doseScheduledFor, parseReminderData, REMINDER_PREFIX, staleReminderIds } from './reminders';
 
 const med = (over: Partial<Medication>): Medication => ({
   id: 'm1',
@@ -40,5 +40,21 @@ describe('staleReminderIds', () => {
     const desired = buildDailyReminders([med({ scheduleTimes: ['08:00'] })]);
     const scheduled = [`${REMINDER_PREFIX}m1:08:00`, `${REMINDER_PREFIX}m1:20:30`, 'otra-app:1'];
     expect(staleReminderIds(scheduled, desired)).toEqual([`${REMINDER_PREFIX}m1:20:30`]);
+  });
+});
+
+describe('parseReminderData', () => {
+  it('acepta datos válidos y rechaza el resto', () => {
+    expect(parseReminderData({ kind: 'medication', medicationId: 'm1', hour: 8, minute: 30 })).toEqual({ kind: 'medication', medicationId: 'm1', hour: 8, minute: 30 });
+    expect(parseReminderData({ kind: 'otra' })).toBeNull();
+    expect(parseReminderData(null)).toBeNull();
+    expect(parseReminderData({ kind: 'medication', medicationId: 'm1', hour: '8', minute: 0 })).toBeNull();
+  });
+});
+
+describe('doseScheduledFor', () => {
+  it('fija la hora local del día indicado', () => {
+    const d = new Date(doseScheduledFor(8, 30, new Date(2026, 10, 18, 15, 0)));
+    expect([d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()]).toEqual([2026, 10, 18, 8, 30, 0]);
   });
 });
