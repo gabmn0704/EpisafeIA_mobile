@@ -167,6 +167,7 @@ export default function Emergency() {
             <View style={{ gap: space.md }}>
               {topContact?.phone ? <Button label={`Llamar a ${topContact.name}`} icon="phone" onPress={() => call(telUrl(topContact.phone as string))} size="lg" /> : null}
               <Button label={`Llamar a emergencias (${EMERGENCY_NUMBER})`} icon="phone" variant="danger" onPress={() => call(telUrl(EMERGENCY_NUMBER))} />
+              <Button label="Ver ficha médica" icon="heart" variant="soft" onPress={() => router.push('/medical-id')} />
               <View style={styles.rowButtons}>
                 <Button label="Ya estoy bien" variant="ghost" size="sm" onPress={() => finish('resolve')} style={{ flex: 1 }} />
                 <Button label="Falsa alarma" variant="ghost" size="sm" onPress={() => finish('false')} style={{ flex: 1 }} />
@@ -199,6 +200,7 @@ export default function Emergency() {
                   setAttempt((a) => a + 1);
                 }}
               />
+              <Button label="Ver ficha médica" icon="heart" variant="soft" size="sm" onPress={() => router.push('/medical-id')} />
               <Button label="Cerrar" variant="ghost" size="sm" onPress={() => router.back()} />
             </View>
           </>
