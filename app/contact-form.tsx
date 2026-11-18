@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
@@ -29,6 +29,7 @@ export default function ContactForm() {
   const [phone, setPhone] = useState(existing?.phone ?? '');
   const [email, setEmail] = useState(existing?.email ?? '');
   const [priority, setPriority] = useState(existing?.priority ?? (contacts.data?.length ?? 0) + 1);
+  const [alertMe, setAlertMe] = useState(existing ? existing.notifySms || existing.notifyEmail : true);
   const [sms, setSms] = useState(existing?.notifySms ?? true);
   const [mail, setMail] = useState(existing?.notifyEmail ?? true);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,8 +51,8 @@ export default function ContactForm() {
           phone: v.phone || null,
           email: v.email || null,
           priority,
-          notifySms: sms && !!v.phone,
-          notifyEmail: mail && !!v.email,
+          notifySms: alertMe && sms && !!v.phone,
+          notifyEmail: alertMe && mail && !!v.email,
         },
       },
       {
@@ -75,15 +76,23 @@ export default function ContactForm() {
         <Card>
           <Stepper label="Prioridad" value={priority} step={1} min={1} max={10} onChange={setPriority} hint="1 recibe el aviso primero" />
         </Card>
-        <View style={{ gap: space.sm }}>
-          <Text variant="label" color={colors.muted}>
-            Avisar por
-          </Text>
-          <View style={styles.row}>
-            <Chip label="SMS" selected={sms} onPress={() => setSms((v) => !v)} />
-            <Chip label="Correo" selected={mail} onPress={() => setMail((v) => !v)} />
+        <Card style={{ gap: space.md }}>
+          <View style={styles.switchRow}>
+            <View style={{ flex: 1 }}>
+              <Text variant="title">Avisar en emergencia</Text>
+              <Text variant="small" color={colors.muted}>
+                {alertMe ? 'Recibirá el aviso automático cuando pulses SOS.' : 'No recibirá aviso automático. Seguirás pudiendo llamarle desde la pantalla de emergencia.'}
+              </Text>
+            </View>
+            <Switch value={alertMe} onValueChange={setAlertMe} trackColor={{ true: colors.lime, false: colors.surface3 }} thumbColor={colors.white} accessibilityLabel="Avisar en emergencia" />
           </View>
-        </View>
+          {alertMe ? (
+            <View style={styles.row}>
+              <Chip label="SMS" selected={sms} onPress={() => setSms((v) => !v)} />
+              <Chip label="Correo" selected={mail} onPress={() => setMail((v) => !v)} />
+            </View>
+          ) : null}
+        </Card>
         <Button label={existing ? 'Guardar cambios' : 'Agregar contacto'} onPress={submit} loading={save.isPending} size="lg" />
         {existing ? (
           <Button
@@ -107,4 +116,4 @@ export default function ContactForm() {
   );
 }
 
-const styles = StyleSheet.create({ row: { flexDirection: 'row', gap: space.sm } });
+const styles = StyleSheet.create({ row: { flexDirection: 'row', gap: space.sm }, switchRow: { flexDirection: 'row', alignItems: 'center', gap: space.md } });
