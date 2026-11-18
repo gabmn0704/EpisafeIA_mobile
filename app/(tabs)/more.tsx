@@ -22,6 +22,7 @@ const ITEMS: Item[] = [
   { icon: 'edit', title: 'Registro de hoy', sub: 'Sueño, estrés, cafeína, ánimo', href: '/daily-log', tone: colors.lime },
   { icon: 'sparkles', title: 'Insights IA', sub: 'Patrones entre tus hábitos y tus crisis', href: '/insights', tone: colors.cyan },
   { icon: 'watch', title: 'Reloj inteligente', sub: 'Próximamente', href: '/devices', tone: colors.coral },
+  { icon: 'chart', title: 'Reporte para el médico', sub: 'Resumen en PDF o texto para tu consulta', href: '/report', tone: colors.cyan },
   { icon: 'heart', title: 'Ficha médica', sub: 'Alergias, medicación y contactos para emergencias', href: '/medical-id', tone: colors.coral },
   { icon: 'users', title: 'Contactos de emergencia', sub: 'Quién recibe tu aviso SOS', href: '/contacts', tone: colors.amber },
   { icon: 'shield', title: 'Perfil y ajustes', sub: 'Recordatorios, cuenta y privacidad', href: '/settings', tone: colors.brand },
