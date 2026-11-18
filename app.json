@@ -58,6 +58,7 @@
         "expo-local-authentication",
         { "faceIDPermission": "EpiSafe IA usa Face ID para proteger tus datos de salud." }
       ],
+      "expo-sharing",
       [
         "expo-location",
         {
