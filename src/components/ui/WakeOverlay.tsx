@@ -6,7 +6,7 @@ import { ensureServerAwake, serverWake } from '@/lib/api/serverWake';
 import { WAKE_MAX_MS } from '@/lib/api/wake';
 import { colors, radius, space } from '@/theme/tokens';
 import { Button } from './Button';
-import { Logo } from './Logo';
+import { BrandLoader } from '@/components/brand/BrandLoader';
 import { Text } from './Text';
 
 /** Cubre la app mientras el servidor gratuito despierta: barra de progreso, reintento automatico y reintento manual. */
@@ -45,7 +45,7 @@ export function WakeOverlay() {
   const failed = wake.phase === 'failed';
   return (
     <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(250)} style={styles.root} accessibilityViewIsModal accessibilityLiveRegion="polite">
-      <Logo />
+      <BrandLoader size={84} />
       <Text variant="h1" center style={{ marginTop: space.xxl }}>
         {failed ? 'No logramos conectar' : 'Despertando el servidor…'}
       </Text>
