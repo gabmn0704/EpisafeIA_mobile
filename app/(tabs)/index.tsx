@@ -7,6 +7,8 @@ import { StatTile } from '@/components/dashboard/StatTile';
 import { Ring } from '@/components/charts/Ring';
 import { RiskMeter } from '@/components/charts/RiskMeter';
 import { Sparkline } from '@/components/charts/Sparkline';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BottomSheet, useSheet } from '@/components/ui/BottomSheet';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { PressableScale } from '@/components/ui/PressableScale';
@@ -30,6 +32,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const dash = useDashboard();
   const history = useRiskHistory(14);
+  const sheet = useSheet();
   const firstName = user?.fullName.split(' ')[0] ?? '';
   const d = dash.data;
   const palette = d ? riskPalette[d.risk.level] : null;
@@ -37,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <Screen
-      bottomInset={90}
+      bottomInset={112}
       refreshing={dash.isRefetching}
       onRefresh={() => {
         void dash.refetch();
@@ -90,12 +93,25 @@ export default function Dashboard() {
           ) : null}
 
           <Animated.View entering={FadeInDown.delay(60).duration(450)}>
-            <Card tone="raised" style={styles.riskCard}>
+            <PressableScale onPress={sheet.show} accessibilityLabel="Ver cómo se calcula tu riesgo" pressedScale={0.985}>
+            <View style={[styles.hero, { borderColor: palette.color }]}>
+              <LinearGradient colors={[palette.soft, 'rgba(18,15,49,0.2)', 'rgba(18,15,49,0.0)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={StyleSheet.absoluteFill} />
+              <View style={styles.heroTop}>
+                <View style={[styles.liveDot, { backgroundColor: palette.color }]} />
+                <Text variant="label" color={colors.muted}>
+                  Predicción de IA · hoy
+                </Text>
+                <View style={{ flex: 1 }} />
+                <Text variant="label" color={palette.color}>
+                  Cómo se calcula
+                </Text>
+                <Icon name="chevronRight" size={14} color={palette.color} />
+              </View>
               <RiskMeter score={d.risk.score} level={d.risk.level} degraded={d.risk.degraded} />
               <Text variant="body" color={colors.muted} center style={{ marginTop: space.sm }}>
                 {palette.message}
               </Text>
-              {series.length > 1 ? (
+              {series.length > 2 ? (
                 <View style={styles.spark}>
                   <Text variant="label" color={colors.faint}>
                     Últimos {series.length} días
@@ -103,14 +119,15 @@ export default function Dashboard() {
                   <Sparkline values={series} min={0} max={100} color={palette.color} width={280} height={54} />
                 </View>
               ) : null}
-            </Card>
+            </View>
+            </PressableScale>
           </Animated.View>
 
           {d.risk.factors.length > 0 ? (
             <Animated.View entering={FadeInDown.delay(120).duration(450)}>
               <Card style={{ gap: space.lg }}>
                 <Text variant="h2">Qué mueve tu riesgo hoy</Text>
-                {d.risk.factors.slice(0, 4).map((f, i) => (
+                {d.risk.factors.slice(0, 3).map((f, i) => (
                   <FactorRow key={f.name} factor={f} index={i} />
                 ))}
               </Card>
@@ -170,6 +187,13 @@ export default function Dashboard() {
           ) : null}
         </View>
       )}
+      <BottomSheet visible={sheet.open} onClose={sheet.hide} title="Cómo se calcula" subtitle="La IA cruza lo que registras con lo que mide tu reloj. No es un diagnóstico.">
+        <View style={{ gap: space.lg }}>
+          {(d?.risk.factors ?? []).map((f, i) => (
+            <FactorRow key={f.name} factor={f} index={i} />
+          ))}
+        </View>
+      </BottomSheet>
     </Screen>
   );
 }
@@ -196,7 +220,9 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.xl },
   avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.lime, alignItems: 'center', justifyContent: 'center' },
   alert: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  riskCard: { alignItems: 'center', paddingVertical: space.xxl },
+  hero: { borderRadius: 32, borderWidth: 1, overflow: 'hidden', backgroundColor: colors.surface, paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.xl, alignItems: 'center' },
+  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'stretch', marginBottom: space.sm },
+  liveDot: { width: 8, height: 8, borderRadius: 4 },
   spark: { marginTop: space.lg, alignItems: 'center', gap: 6 },
   tiles: { flexDirection: 'row', gap: space.md },
   adherence: { flexDirection: 'row', alignItems: 'center', gap: space.lg },

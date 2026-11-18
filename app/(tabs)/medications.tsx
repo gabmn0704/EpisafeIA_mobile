@@ -67,7 +67,7 @@ export default function Medications() {
 
   return (
     <Screen
-      bottomInset={90}
+      bottomInset={112}
       refreshing={doses.isRefetching}
       onRefresh={() => {
         void doses.refetch();

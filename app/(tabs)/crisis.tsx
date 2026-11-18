@@ -31,7 +31,7 @@ export default function Crisis() {
 
   return (
     <Screen
-      bottomInset={90}
+      bottomInset={112}
       refreshing={list.isRefetching}
       onRefresh={() => {
         void list.refetch();

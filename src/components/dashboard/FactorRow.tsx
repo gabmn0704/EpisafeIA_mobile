@@ -18,7 +18,7 @@ export function FactorRow({ factor, index }: { factor: RiskFactor; index: number
       <View style={{ flex: 1, gap: 4 }}>
         <View style={styles.top}>
           <Text variant="title" style={{ flex: 1, fontSize: 14 }} numberOfLines={1}>
-            {factor.name}
+            {factor.name.charAt(0).toUpperCase() + factor.name.slice(1)}
           </Text>
           <Text variant="label" color={tone}>
             {up ? 'Sube' : 'Baja'}
