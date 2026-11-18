@@ -9,3 +9,10 @@ dist/
 web-build/
 ios/
 android/
+expo-env.d.ts
+coverage/
+*.apk
+*.ipa
+*.aab
+.eslintcache
+.tscache

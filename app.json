@@ -1,0 +1,77 @@
+{
+  "expo": {
+    "name": "EpiSafe IA",
+    "slug": "episafe-ia",
+    "scheme": "episafe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#08061c",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#08061c"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.episafe.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "EpiSafe IA usa tu ubicacion solo cuando activas una emergencia, para avisar a tus contactos donde estas.",
+        "NSBluetoothAlwaysUsageDescription": "EpiSafe IA se conecta por Bluetooth a tu reloj o banda para leer tu pulso.",
+        "UIBackgroundModes": ["bluetooth-central"]
+      }
+    },
+    "android": {
+      "package": "app.episafe.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#08061c",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_CONNECT",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-notifications",
+        { "color": "#8a63ff" }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "EpiSafe IA usa tu ubicacion solo cuando activas una emergencia."
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": ["central"],
+          "bluetoothAlwaysPermission": "EpiSafe IA se conecta por Bluetooth a tu reloj o banda para leer tu pulso."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": { "projectId": "21065e5c-9c93-4295-957e-76a2930ebe7c" }
+    },
+    "owner": "gabmnn"
+  }
+}
