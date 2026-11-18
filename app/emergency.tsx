@@ -158,6 +158,7 @@ export default function Emergency() {
               </Text>
             </View>
             {contactList}
+            <Button label="Ver ficha médica" icon="heart" variant="soft" size="sm" onPress={() => router.push('/medical-id')} />
             <View style={styles.rowButtons}>
               <Button label="Ya estoy bien" variant="ghost" size="sm" onPress={() => finish('resolve')} style={{ flex: 1 }} />
               <Button label="Falsa alarma" variant="ghost" size="sm" onPress={() => finish('false')} style={{ flex: 1 }} />
@@ -188,6 +189,7 @@ export default function Emergency() {
                   setAttempt((a) => a + 1);
                 }}
               />
+              <Button label="Ver ficha médica" icon="heart" variant="soft" size="sm" onPress={() => router.push('/medical-id')} />
               <Button label="Cerrar" variant="ghost" size="sm" onPress={() => router.back()} />
             </View>
           </>
