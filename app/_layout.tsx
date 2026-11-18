@@ -3,12 +3,18 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { BrandLoader } from '@/components/brand/BrandLoader';
+import { BrandIntro } from '@/components/brand/BrandIntro';
+import { useReminderActions } from '@/hooks/useReminderActions';
+import { WakeOverlay } from '@/components/ui/WakeOverlay';
+import { SosFloat } from '@/components/ui/SosFloat';
+import { AppLockProvider } from '@/providers/AppLockProvider';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
-import { WearableProvider } from '@/providers/WearableProvider';
 import { colors } from '@/theme/tokens';
 import { useAppFonts } from '@/theme/useAppFonts';
 
@@ -26,6 +32,9 @@ function Routes() {
         <Stack.Screen name="insights" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="contacts" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="devices" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="medical-id" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="report" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="calendar" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="medication-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="seizure-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
@@ -42,19 +51,37 @@ function Routes() {
 function Shell() {
   const fontsReady = useAppFonts();
   const { status } = useAuth();
-  const ready = fontsReady && status !== 'loading';
+  useReminderActions();
+  const [introDone, setIntroDone] = useState(false);
+  const finishIntro = useCallback(() => setIntroDone(true), []);
 
+  // El splash nativo (mismo fondo) se quita en cuanto la animación de marca puede dibujarse.
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => undefined);
-  }, [ready]);
+    if (fontsReady) SplashScreen.hideAsync().catch(() => undefined);
+  }, [fontsReady]);
 
-  if (!ready) return null;
+  // Seguro: si la animación nativa no avisa que terminó, la capa de entrada (zIndex alto) taparía los toques.
+  useEffect(() => {
+    const id = setTimeout(finishIntro, 3500);
+    return () => clearTimeout(id);
+  }, [finishIntro]);
+
+  if (!fontsReady) return null;
   return (
     <>
       <StatusBar style="light" />
-      <WearableProvider>
-        <Routes />
-      </WearableProvider>
+      <AppLockProvider>
+        {status === 'loading' ? (
+          <View style={styles.loading}>
+            <BrandLoader />
+          </View>
+        ) : (
+          <Routes />
+        )}
+      </AppLockProvider>
+      <SosFloat />
+      <WakeOverlay />
+      {!introDone ? <BrandIntro onDone={finishIntro} /> : null}
     </>
   );
 }
@@ -65,9 +92,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>
-              <Shell />
-            </ToastProvider>
+            <OfflineQueueProvider>
+              <ToastProvider>
+                <Shell />
+              </ToastProvider>
+            </OfflineQueueProvider>
           </AuthProvider>
         </QueryProvider>
       </SafeAreaProvider>
@@ -75,4 +104,7 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: colors.bg } });
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+});

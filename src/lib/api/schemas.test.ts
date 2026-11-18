@@ -1,4 +1,4 @@
-import { authResponseSchema, dashboardSchema, scheduleResponseSchema, seizureListSchema } from './schemas';
+import { authResponseSchema, dashboardSchema, medicationResponseSchema, scheduleResponseSchema, seizureListSchema } from './schemas';
 
 describe('response schemas', () => {
   it('accepts a dashboard summary with no seizures and no heart rate', () => {
@@ -51,5 +51,14 @@ describe('response schemas', () => {
       authResponseSchema.parse({ user: { id: '1', email: 'a@b.co', fullName: 'Ana' }, accessToken: 'x', refreshToken: 'y' }).user.fullName,
     ).toBe('Ana');
     expect(seizureListSchema.parse({ seizures: [], page: 1, limit: 20, total: 0, totalPages: 1 }).total).toBe(0);
+  });
+});
+
+describe('dose normalization', () => {
+  it('accepts a numeric dose from the production API', () => {
+    const parsed = medicationResponseSchema.parse({
+      medication: { id: 'm1', name: 'Levetiracetam', dose: 500, unit: 'mg', scheduleTimes: ['08:00'], active: true, notes: null },
+    });
+    expect(parsed.medication.dose).toBe('500');
   });
 });

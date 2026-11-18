@@ -7,7 +7,8 @@ import { Field } from '@/components/ui/Field';
 import { Logo } from '@/components/ui/Logo';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
-import { friendlyMessage } from '@/lib/api/errors';
+import { ensureServerAwake } from '@/lib/api/serverWake';
+import { ApiError, friendlyMessage } from '@/lib/api/errors';
 import { haptic } from '@/lib/haptics';
 import { fieldErrors, registerSchema } from '@/lib/validation';
 import { useAuth } from '@/providers/AuthProvider';
@@ -32,6 +33,7 @@ export default function Register() {
     setErrors({});
     setBusy(true);
     try {
+      if (!(await ensureServerAwake())) throw new ApiError(0, 'NETWORK_ERROR', 'No se pudo conectar con el servidor.');
       await signUp(parsed.data);
     } catch (e) {
       haptic.error();

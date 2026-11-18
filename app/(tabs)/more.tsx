@@ -21,7 +21,10 @@ interface Item {
 const ITEMS: Item[] = [
   { icon: 'edit', title: 'Registro de hoy', sub: 'Sueño, estrés, cafeína, ánimo', href: '/daily-log', tone: colors.lime },
   { icon: 'sparkles', title: 'Insights IA', sub: 'Patrones entre tus hábitos y tus crisis', href: '/insights', tone: colors.cyan },
-  { icon: 'watch', title: 'Reloj y dispositivos', sub: 'Pulso en tiempo real por Bluetooth', href: '/devices', tone: colors.coral },
+  { icon: 'watch', title: 'Reloj inteligente', sub: 'Próximamente', href: '/devices', tone: colors.coral },
+  { icon: 'calendar', title: 'Calendario de crisis', sub: 'Mira por mes qué días tuviste crisis', href: '/calendar', tone: colors.coral },
+  { icon: 'chart', title: 'Reporte para el médico', sub: 'Resumen en PDF o texto para tu consulta', href: '/report', tone: colors.cyan },
+  { icon: 'heart', title: 'Ficha médica', sub: 'Alergias, medicación y contactos para emergencias', href: '/medical-id', tone: colors.coral },
   { icon: 'users', title: 'Contactos de emergencia', sub: 'Quién recibe tu aviso SOS', href: '/contacts', tone: colors.amber },
   { icon: 'shield', title: 'Perfil y ajustes', sub: 'Recordatorios, cuenta y privacidad', href: '/settings', tone: colors.brand },
 ];
@@ -29,7 +32,7 @@ const ITEMS: Item[] = [
 export default function More() {
   const { user } = useAuth();
   return (
-    <Screen bottomInset={90}>
+    <Screen bottomInset={112}>
       <Header title="Más" subtitle="Todo lo demás de EpiSafe" />
       <Animated.View entering={FadeInDown.duration(350)}>
         <PressableScale onPress={() => router.push('/settings')} accessibilityLabel="Abrir perfil">

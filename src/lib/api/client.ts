@@ -38,7 +38,7 @@ export class ApiClient {
 
   constructor(private readonly deps: ApiClientDeps) {
     this.doFetch = deps.fetchImpl ?? ((...args) => fetch(...args));
-    this.timeoutMs = deps.timeoutMs ?? 15_000;
+    this.timeoutMs = deps.timeoutMs ?? 30_000;
   }
 
   get<T = unknown>(path: string, opts?: RequestOptions<T>): Promise<T> {

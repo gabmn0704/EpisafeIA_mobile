@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -9,10 +10,12 @@ import { Icon } from '@/components/ui/Icon';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
-import { useDeleteMedication, useMedications, useSaveMedication } from '@/hooks/queries';
+import { keys, useDeleteMedication, useMedications, useSaveMedication } from '@/hooks/queries';
 import { useMedSearch } from '@/hooks/useMedSearch';
 import { friendlyMessage } from '@/lib/api/errors';
 import { haptic } from '@/lib/haptics';
+import { askReminderPermission } from '@/lib/notifications';
+import { prefs } from '@/lib/prefs';
 import { fieldErrors, medicationFormSchema, normalizeTime } from '@/lib/validation';
 import { useToast } from '@/providers/ToastProvider';
 import { colors, radius, space } from '@/theme/tokens';
@@ -25,6 +28,7 @@ export default function MedicationForm() {
   const save = useSaveMedication();
   const del = useDeleteMedication();
   const toast = useToast();
+  const qc = useQueryClient();
 
   const [name, setName] = useState(existing?.name ?? '');
   const [dose, setDose] = useState(existing?.dose ?? '');
@@ -56,9 +60,13 @@ export default function MedicationForm() {
     save.mutate(
       { id, data: { name: parsed.data.name, dose: parsed.data.dose ?? null, unit: parsed.data.unit ?? null, scheduleTimes: parsed.data.times } },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.success(existing ? 'Medicamento actualizado' : 'Medicamento agregado');
           router.back();
+          // Primera vez con horarios: se explica y se pide el permiso para los recordatorios.
+          if (parsed.data.times.length > 0 && (await prefs.remindersEnabled())) {
+            if (await askReminderPermission()) await qc.invalidateQueries({ queryKey: keys.medications });
+          }
         },
         onError: (e) => toast.error(friendlyMessage(e)),
       },
@@ -89,7 +97,7 @@ export default function MedicationForm() {
               setShowSuggest(true);
             }}
             error={errors.name}
-            placeholder="Ej. Levetiracetam"
+            placeholder="Escribe el nombre de tu medicamento"
             autoCapitalize="words"
           />
           {suggestions.length > 0 ? (

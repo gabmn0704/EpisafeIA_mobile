@@ -25,7 +25,7 @@ const SLIDES: Slide[] = [
     icon: 'activity',
     accent: colors.lime,
     title: 'Anticipa tu día',
-    body: 'Cruzamos tu sueño, estrés, medicación y pulso para estimar tu riesgo de crisis y mostrarte qué lo mueve.',
+    body: 'Cruzamos tu sueño, estrés y medicación para estimar tu riesgo de crisis y mostrarte qué lo mueve.',
   },
   {
     icon: 'alert',

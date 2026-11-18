@@ -11,14 +11,16 @@ import { Screen } from '@/components/ui/Screen';
 import { Stepper } from '@/components/ui/Stepper';
 import { Text } from '@/components/ui/Text';
 import { useCreateSeizure } from '@/hooks/queries';
-import { friendlyMessage } from '@/lib/api/errors';
+import { ApiError, friendlyMessage } from '@/lib/api/errors';
 import { SEIZURE_TYPES, startedAtFor, toggleItem, TRIGGERS, WHEN_LABELS, type WhenPreset } from '@/lib/seizureForm';
+import { useOfflineQueue } from '@/providers/OfflineQueueProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { colors, space } from '@/theme/tokens';
 
 export default function SeizureForm() {
   const create = useCreateSeizure();
   const toast = useToast();
+  const offline = useOfflineQueue();
   const [when, setWhen] = useState<WhenPreset>('now');
   const [minutes, setMinutes] = useState(1);
   const [severity, setSeverity] = useState<number | null>(null);
@@ -27,21 +29,30 @@ export default function SeizureForm() {
   const [notes, setNotes] = useState('');
 
   const submit = () => {
+    const payload = {
+      startedAt: startedAtFor(when),
+      durationSeconds: Math.round(minutes * 60),
+      severity,
+      seizureType: type,
+      triggersNoted: triggers,
+      notes: notes.trim() || null,
+    };
     create.mutate(
-      {
-        startedAt: startedAtFor(when),
-        durationSeconds: Math.round(minutes * 60),
-        severity,
-        seizureType: type,
-        triggersNoted: triggers,
-        notes: notes.trim() || null,
-      },
+      payload,
       {
         onSuccess: () => {
           toast.success('Crisis registrada. Recalculamos tu riesgo.');
           router.back();
         },
-        onError: (e) => toast.error(friendlyMessage(e)),
+        onError: async (e) => {
+          if (e instanceof ApiError && e.isNetwork) {
+            await offline.enqueue({ kind: 'seizure', payload });
+            toast.show({ message: 'Sin conexión. Guardamos la crisis en tu teléfono y se enviará sola.', tone: 'warning', durationMs: 5000 });
+            router.back();
+            return;
+          }
+          toast.error(friendlyMessage(e));
+        },
       },
     );
   };

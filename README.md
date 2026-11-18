@@ -6,12 +6,23 @@ Consume el API de `EpisafeIa_back` (contrato en `docs/API.md` de ese repo) y reu
 
 ## Pantallas
 
-Onboarding, login/registro, Dashboard (medidor de riesgo animado, factores, pulso, adherencia, racha), registro diario (con deshacer), medicamentos (agenda, marcar toma, recordatorios locales), crisis (línea de tiempo y alta manual), **emergencia** (cuenta atrás cancelable, ubicación, llamada a contacto), insights de IA, contactos, reloj/dispositivos y ajustes.
+Onboarding, login/registro, Dashboard (medidor de riesgo animado, factores, pulso, adherencia, racha), registro diario (con deshacer), medicamentos (agenda, marcar toma, recordatorios locales), crisis (línea de tiempo y alta manual), **emergencia** (cuenta atrás cancelable, ubicación, lista de todos tus contactos con Llamar, SMS y WhatsApp), insights de IA, contactos, reloj/dispositivos y ajustes.
+
+## Funciones extra
+
+- **Cola offline** (`src/lib/offlineQueue.ts`): si falla la red al guardar una crisis, un registro diario o una toma de medicación, se guarda en AsyncStorage (una cola por usuario) y se reintenta cada 20 s y al volver a la app. Un aviso ámbar "N registros pendientes de enviar" aparece en las pantallas y permite reintentar a mano. Los rechazos 4xx se descartan; red y 5xx se reintentan.
+- **Recordatorios de medicación**: notificaciones locales diarias por horario, canal Android, permiso pedido con explicación previa, botones "Ya la tomé" y "Recordar en 10 min" (la app se abre un instante para registrar la toma) y reprogramación al editar o borrar medicamentos.
+- **Ficha médica de emergencia** (`/medical-id`): alergias, grupo sanguíneo, condiciones e indicaciones (solo en el teléfono, no hay endpoint en el API) más medicación y contactos copiados del API para verlos sin red. Accesible desde la pantalla de emergencia y sin desbloquear la app.
+- **Bloqueo con huella/rostro/PIN** (Ajustes): desactivado por defecto. Pide desbloqueo al abrir y tras 30 s en segundo plano. La emergencia y la ficha médica quedan abiertas.
+- **Reporte para el médico** (`/report`): crisis, desencadenantes frecuentes, medicación y adherencia, y hábitos de un periodo; se comparte como PDF (`expo-print` + `expo-sharing`) o texto.
+- **Calendario de crisis** (`/calendar`): vista mensual con los días con crisis marcados y detalle al tocar un día.
+
+Todo funciona en Expo Go.
 
 ## Requisitos
 
 - Node 20+ y npm.
-- App **Expo Go** en el celular (todo menos el Bluetooth del reloj funciona en Expo Go).
+- App **Expo Go** en el celular (todo funciona en Expo Go).
 - El API corriendo en tu PC (`EpisafeIa_back`, puerto 4000 por defecto).
 
 ## Correr en el celular con Expo Go (API en la PC, red local)
@@ -32,28 +43,10 @@ Variables disponibles (todas públicas, **no pongas secretos**):
 | Variable | Uso |
 | --- | --- |
 | `EXPO_PUBLIC_API_URL` | URL base del API, incluyendo `/api/v1`. |
-| `EXPO_PUBLIC_EMERGENCY_NUMBER` | Número local de emergencias para el botón de llamada (por defecto `123`). Cámbialo según tu país. |
 
-## Reloj y Bluetooth (requiere development build)
+## Reloj: próximamente
 
-El reloj se lee con `react-native-ble-plx` y el servicio estándar **Heart Rate** (`0x180D`, característica `0x2A37`). Ese módulo es nativo, así que **no funciona en Expo Go**: ahí la pantalla *Reloj* explica la limitación y el resto de la app sigue funcionando.
-
-Para probar con un reloj o banda real:
-
-```bash
-npm install -g eas-cli
-eas login
-eas build --profile development --platform android   # o ios
-```
-
-Instala el APK/IPA resultante y arranca con `npx expo start --dev-client`. En el reloj activa la emisión de pulso por Bluetooth (*Heart Rate Broadcast*) y usa **Reloj → Buscar mi reloj**.
-
-Cómo funciona (`src/lib/ble`):
-
-- `hrParser.ts`: parser de la trama GATT (flags, pulso uint8/uint16, contacto con la piel, energía, intervalos RR y RMSSD), con tests sobre tramas hexadecimales.
-- `HeartRateClient.ts`: escaneo, conexión y reconexión con backoff exponencial sobre una abstracción `BleTransport` (probada con un transporte falso). `BlxTransport.ts` es el único archivo que toca el módulo nativo.
-- `SampleUploader.ts`: buffer circular propio y envío por lotes (máx. 200) a `POST /wearables/samples`; si falla la red las muestras se conservan y se reintenta.
-- **No hay datos simulados.** Sin dispositivo, la UI lo dice y no muestra pulso.
+La función de reloj está desactivada en la app (pantalla "Próximamente"). No se pide ningún permiso de Bluetooth y `react-native-ble-plx` ya no es dependencia. Se conserva la lógica pura en `src/lib/ble` (parser de la trama Heart Rate `0x180D/0x2A37`, cliente con reconexión sobre una abstracción `BleTransport` y `SampleUploader`), con sus tests, para reactivarla cuando se añada un transporte nativo.
 
 ### Salud del sistema (HealthKit / Health Connect): PENDIENTE
 

@@ -13,11 +13,12 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Stepper } from '@/components/ui/Stepper';
 import { Text } from '@/components/ui/Text';
 import { useDailyLog, useSaveDailyLog } from '@/hooks/queries';
-import { friendlyMessage } from '@/lib/api/errors';
+import { ApiError, friendlyMessage } from '@/lib/api/errors';
 import { toDateKey } from '@/lib/dates';
 import { formFromLog, toPayload, type DailyLogForm } from '@/lib/dailyLogForm';
 import { haptic } from '@/lib/haptics';
 import { Stack } from '@/lib/structures';
+import { useOfflineQueue } from '@/providers/OfflineQueueProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { colors, space } from '@/theme/tokens';
 
@@ -42,6 +43,7 @@ export default function DailyLog() {
 function DailyLogEditor({ date, initial }: { date: string; initial: DailyLogForm }) {
   const save = useSaveDailyLog();
   const toast = useToast();
+  const offline = useOfflineQueue();
   const [form, setForm] = useState<DailyLogForm>(initial);
   // Pila de estados previos: cada cambio apila el anterior, "Deshacer" lo recupera (LIFO).
   const history = useRef(new Stack<DailyLogForm>(30));
@@ -69,7 +71,15 @@ function DailyLogEditor({ date, initial }: { date: string; initial: DailyLogForm
           toast.success('Registro guardado. Actualizamos tu riesgo.');
           router.back();
         },
-        onError: (e) => toast.error(friendlyMessage(e)),
+        onError: async (e) => {
+          if (e instanceof ApiError && e.isNetwork) {
+            await offline.enqueue({ kind: 'dailyLog', date, payload: toPayload(form) });
+            toast.show({ message: 'Sin conexión. Guardamos tu registro en el teléfono y se enviará solo.', tone: 'warning', durationMs: 5000 });
+            router.back();
+            return;
+          }
+          toast.error(friendlyMessage(e));
+        },
       },
     );
   };

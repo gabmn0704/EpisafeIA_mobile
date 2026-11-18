@@ -31,7 +31,7 @@ export default function Crisis() {
 
   return (
     <Screen
-      bottomInset={90}
+      bottomInset={112}
       refreshing={list.isRefetching}
       onRefresh={() => {
         void list.refetch();
@@ -68,7 +68,8 @@ export default function Crisis() {
         </View>
       ) : null}
 
-      <Button label="Registrar una crisis" icon="plus" onPress={() => router.push('/seizure-form')} variant="brand" style={{ marginVertical: space.lg }} />
+      <Button label="Registrar una crisis" icon="plus" onPress={() => router.push('/seizure-form')} variant="brand" style={{ marginTop: space.lg, marginBottom: space.md }} />
+      <Button label="Ver calendario" icon="calendar" onPress={() => router.push('/calendar')} variant="soft" style={{ marginBottom: space.lg }} />
 
       {list.isLoading ? (
         <View style={{ gap: space.md }}>

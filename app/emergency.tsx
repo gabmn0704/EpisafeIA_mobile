@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
@@ -10,14 +10,13 @@ import { Text } from '@/components/ui/Text';
 import { useContacts } from '@/hooks/queries';
 import { endpoints } from '@/lib/api/instance';
 import { friendlyMessage } from '@/lib/api/errors';
-import { emergencyReducer, initialEmergency, mapsLink, telUrl } from '@/lib/emergencyMachine';
+import type { Contact } from '@/lib/api/schemas';
+import { emergencyMessage, emergencyReducer, initialEmergency, smsUrl, telUrl, whatsappUrl } from '@/lib/emergencyMachine';
+import { useAuth } from '@/providers/AuthProvider';
 import { haptic } from '@/lib/haptics';
 import { getEmergencyPosition, type PositionResult } from '@/lib/location';
 import { useToast } from '@/providers/ToastProvider';
 import { colors, radius, space } from '@/theme/tokens';
-
-/** Número local de emergencias. Configurable por país con EXPO_PUBLIC_EMERGENCY_NUMBER (por defecto 123, Colombia). */
-const EMERGENCY_NUMBER = process.env.EXPO_PUBLIC_EMERGENCY_NUMBER?.trim() || '123';
 
 function Ripple({ delay }: { delay: number }) {
   const p = useSharedValue(0);
@@ -38,7 +37,6 @@ export default function Emergency() {
   const sentGuard = useRef(false);
   const [attempt, setAttempt] = useState(0);
 
-  const topContact = contacts.data?.[0];
 
   // La ubicación se pide durante la cuenta atrás para no retrasar el aviso.
   useEffect(() => {
@@ -93,6 +91,10 @@ export default function Emergency() {
     }
   };
 
+  const { user } = useAuth();
+  const sorted = [...(contacts.data ?? [])].sort((a, b) => a.priority - b.priority);
+  const message = emergencyMessage(user?.fullName ?? 'un usuario de EpiSafe', new Date(), position?.ok ? position : null);
+  const contactList = <ContactList contacts={sorted} message={message} open={call} />;
   const countdown = state.phase === 'countdown';
 
   return (
@@ -138,57 +140,45 @@ export default function Emergency() {
           </View>
         ) : state.phase === 'sent' ? (
           <>
-            <View style={styles.center}>
-              <View style={[styles.disc, { backgroundColor: colors.lime }]}>
-                <Icon name="check" size={64} color={colors.limeInk} strokeWidth={3} />
+            <View style={styles.statusRow}>
+              <View style={[styles.miniDisc, { backgroundColor: colors.lime }]}>
+                <Icon name="check" size={30} color={colors.limeInk} strokeWidth={3} />
               </View>
-              <Text variant="h1" center style={{ marginTop: space.xl }}>
-                Aviso enviado
-              </Text>
-              <Text variant="body" color={colors.muted} center style={{ marginTop: space.sm, maxWidth: 320 }}>
-                {state.warning ?? 'Tus contactos recibieron tu alerta.'}
-              </Text>
-              <View style={styles.loc}>
-                <Icon name="location" size={16} color={position?.ok ? colors.lime : colors.amber} />
+              <View style={{ flex: 1 }}>
+                <Text variant="h1">{sorted.length === 0 ? 'Alerta registrada' : 'Aviso enviado'}</Text>
                 <Text variant="small" color={colors.muted}>
-                  {position?.ok
-                    ? `Ubicación compartida (${position.latitude.toFixed(4)}, ${position.longitude.toFixed(4)})`
-                    : position?.ok === false && position.reason === 'denied'
-                      ? 'Sin permiso de ubicación: se avisó sin ella'
-                      : 'No se pudo obtener tu ubicación'}
+                  {state.warning ?? 'Tus contactos con aviso activo recibieron tu alerta.'}
                 </Text>
               </View>
-              {position?.ok ? (
-                <Text variant="small" color={colors.faint} onPress={() => call(mapsLink(position.latitude, position.longitude))} style={{ textDecorationLine: 'underline', marginTop: 4 }}>
-                  Ver en el mapa
-                </Text>
-              ) : null}
             </View>
-            <View style={{ gap: space.md }}>
-              {topContact?.phone ? <Button label={`Llamar a ${topContact.name}`} icon="phone" onPress={() => call(telUrl(topContact.phone as string))} size="lg" /> : null}
-              <Button label={`Llamar a emergencias (${EMERGENCY_NUMBER})`} icon="phone" variant="danger" onPress={() => call(telUrl(EMERGENCY_NUMBER))} />
-              <View style={styles.rowButtons}>
-                <Button label="Ya estoy bien" variant="ghost" size="sm" onPress={() => finish('resolve')} style={{ flex: 1 }} />
-                <Button label="Falsa alarma" variant="ghost" size="sm" onPress={() => finish('false')} style={{ flex: 1 }} />
-              </View>
+            <View style={styles.loc}>
+              <Icon name="location" size={16} color={position?.ok ? colors.lime : colors.amber} />
+              <Text variant="small" color={colors.muted}>
+                {position?.ok ? 'Ubicación incluida en los mensajes' : position?.ok === false && position.reason === 'denied' ? 'Sin permiso de ubicación: se avisó sin ella' : 'No se pudo obtener tu ubicación'}
+              </Text>
+            </View>
+            {contactList}
+            <Button label="Ver ficha médica" icon="heart" variant="soft" size="sm" onPress={() => router.push('/medical-id')} />
+            <View style={styles.rowButtons}>
+              <Button label="Ya estoy bien" variant="ghost" size="sm" onPress={() => finish('resolve')} style={{ flex: 1 }} />
+              <Button label="Falsa alarma" variant="ghost" size="sm" onPress={() => finish('false')} style={{ flex: 1 }} />
             </View>
           </>
         ) : state.phase === 'error' ? (
           <>
-            <View style={styles.center}>
-              <View style={[styles.disc, { backgroundColor: colors.coralSoft, borderWidth: 2, borderColor: colors.coral }]}>
-                <Icon name="alert" size={60} color={colors.coral} />
+            <View style={styles.statusRow}>
+              <View style={[styles.miniDisc, { backgroundColor: colors.coralSoft, borderWidth: 2, borderColor: colors.coral }]}>
+                <Icon name="alert" size={28} color={colors.coral} />
               </View>
-              <Text variant="h1" center style={{ marginTop: space.xl }}>
-                No pudimos avisar
-              </Text>
-              <Text variant="body" color={colors.muted} center style={{ marginTop: space.sm, maxWidth: 320 }}>
-                {state.message} Llama directamente mientras reintentamos.
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text variant="h1">No pudimos avisar</Text>
+                <Text variant="small" color={colors.muted}>
+                  {state.message} Avisa tú directamente con los botones mientras reintentamos.
+                </Text>
+              </View>
             </View>
+            {contactList}
             <View style={{ gap: space.md }}>
-              <Button label={`Llamar a emergencias (${EMERGENCY_NUMBER})`} icon="phone" variant="danger" size="lg" onPress={() => call(telUrl(EMERGENCY_NUMBER))} />
-              {topContact?.phone ? <Button label={`Llamar a ${topContact.name}`} icon="phone" variant="soft" onPress={() => call(telUrl(topContact.phone as string))} /> : null}
               <Button
                 label="Reintentar aviso"
                 icon="refresh"
@@ -199,6 +189,7 @@ export default function Emergency() {
                   setAttempt((a) => a + 1);
                 }}
               />
+              <Button label="Ver ficha médica" icon="heart" variant="soft" size="sm" onPress={() => router.push('/medical-id')} />
               <Button label="Cerrar" variant="ghost" size="sm" onPress={() => router.back()} />
             </View>
           </>
@@ -223,6 +214,61 @@ export default function Emergency() {
   );
 }
 
+function ContactList({ contacts, message, open }: { contacts: Contact[]; message: string; open: (url: string) => void }) {
+  if (contacts.length === 0) {
+    return (
+      <View style={[styles.center, { gap: space.md }]}>
+        <Icon name="users" size={44} color={colors.amber} />
+        <Text variant="h2" center>
+          No tienes contactos de emergencia
+        </Text>
+        <Text variant="body" color={colors.muted} center style={{ maxWidth: 300 }}>
+          Añade al menos una persona de confianza para poder avisarle desde aquí.
+        </Text>
+        <Button label="Añadir contacto" icon="plus" onPress={() => router.push('/contact-form')} />
+      </View>
+    );
+  }
+  const os = Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web';
+  return (
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: space.md, paddingVertical: space.md }} showsVerticalScrollIndicator={false}>
+      {contacts.map((c) => {
+        const auto = (c.notifySms && !!c.phone) || (c.notifyEmail && !!c.email);
+        return (
+          <View key={c.id} style={styles.contact}>
+            <View style={styles.contactTop}>
+              <View style={styles.badge}>
+                <Text variant="label" color={colors.limeInk}>
+                  {c.priority}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="title" numberOfLines={1}>
+                  {c.name}
+                </Text>
+                <Text variant="small" color={auto ? colors.muted : colors.amber} numberOfLines={1}>
+                  {[c.relationship, auto ? 'Recibió aviso automático' : 'Sin aviso automático'].filter(Boolean).join(' · ')}
+                </Text>
+              </View>
+            </View>
+            {c.phone ? (
+              <View style={styles.rowButtons}>
+                <Button label="Llamar" icon="phone" size="sm" onPress={() => open(telUrl(c.phone as string))} style={{ flex: 1 }} />
+                <Button label="SMS" icon="mail" size="sm" variant="soft" onPress={() => open(smsUrl(c.phone as string, message, os))} style={{ flex: 1 }} />
+                <Button label="WhatsApp" size="sm" variant="soft" onPress={() => open(whatsappUrl(c.phone as string, message))} style={{ flex: 1.3 }} />
+              </View>
+            ) : (
+              <Text variant="small" color={colors.faint}>
+                Sin teléfono: añade uno para llamarle o escribirle.
+              </Text>
+            )}
+          </View>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
 const DISC = 168;
 
 const styles = StyleSheet.create({
@@ -234,5 +280,10 @@ const styles = StyleSheet.create({
   disc: { width: DISC, height: DISC, borderRadius: DISC / 2, backgroundColor: colors.coral, alignItems: 'center', justifyContent: 'center' },
   count: { fontFamily: 'Outfit_800ExtraBold', fontSize: 96, lineHeight: 104, color: '#2a0510', letterSpacing: -4 },
   loc: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: space.lg, backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.pill },
+  statusRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.lg },
+  miniDisc: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  contact: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.md, gap: space.md, borderWidth: 1, borderColor: colors.line },
+  contactTop: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  badge: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.lime, alignItems: 'center', justifyContent: 'center' },
   rowButtons: { flexDirection: 'row', gap: space.md },
 });
