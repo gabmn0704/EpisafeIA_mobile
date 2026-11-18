@@ -31,6 +31,7 @@ function Routes() {
         <Stack.Screen name="devices" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="medical-id" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="report" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="calendar" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="medication-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="seizure-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
