@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { useReminderActions } from '@/hooks/useReminderActions';
+import { AppLockProvider } from '@/providers/AppLockProvider';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -56,9 +57,11 @@ function Shell() {
   return (
     <>
       <StatusBar style="light" />
-      <WearableProvider>
-        <Routes />
-      </WearableProvider>
+      <AppLockProvider>
+        <WearableProvider>
+          <Routes />
+        </WearableProvider>
+      </AppLockProvider>
     </>
   );
 }
