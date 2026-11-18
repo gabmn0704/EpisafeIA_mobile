@@ -89,7 +89,7 @@ export default function MedicationForm() {
               setShowSuggest(true);
             }}
             error={errors.name}
-            placeholder="Ej. Levetiracetam"
+            placeholder="Escribe el nombre de tu medicamento"
             autoCapitalize="words"
           />
           {suggestions.length > 0 ? (

@@ -94,6 +94,7 @@ export default function Medications() {
         <QueryError error={doses.error} onRetry={() => void doses.refetch()} />
       ) : (
         <View style={{ gap: space.lg }}>
+          {(meds.data?.length ?? 0) > 0 ? (
           <Card tone="raised" style={styles.summary}>
             <Ring value={progress} label="hoy" size={92} />
             <View style={{ flex: 1, gap: 4 }}>
@@ -112,6 +113,7 @@ export default function Medications() {
               ) : null}
             </View>
           </Card>
+          ) : null}
 
           {list.length > 0 ? (
             <Card style={{ paddingTop: space.xl }}>

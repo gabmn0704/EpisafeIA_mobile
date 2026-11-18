@@ -16,7 +16,7 @@ import { QueryError } from '@/components/ui/QueryError';
 import { Screen } from '@/components/ui/Screen';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Text } from '@/components/ui/Text';
-import { useDashboard, useRiskHistory } from '@/hooks/queries';
+import { useDashboard, useMedications, useRiskHistory } from '@/hooks/queries';
 import { formatDateLong, greeting, timeAgo } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, riskPalette, space } from '@/theme/tokens';
@@ -33,6 +33,8 @@ export default function Dashboard() {
   const dash = useDashboard();
   const history = useRiskHistory(14);
   const sheet = useSheet();
+  const meds = useMedications();
+  const hasMeds = (meds.data?.length ?? 0) > 0;
   const firstName = user?.fullName.split(' ')[0] ?? '';
   const d = dash.data;
   const palette = d ? riskPalette[d.risk.level] : null;
@@ -154,6 +156,24 @@ export default function Dashboard() {
             />
           </Animated.View>
 
+          {meds.isSuccess && !hasMeds ? (
+            <Animated.View entering={FadeInDown.delay(240).duration(450)}>
+              <PressableScale onPress={() => router.push('/medication-form')} accessibilityLabel="Agregar tu primer medicamento">
+                <Card tone="outline" style={styles.adherence}>
+                  <Icon name="pill" size={22} color={colors.brand} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="title">Agrega tu medicación</Text>
+                    <Text variant="small" color={colors.muted}>
+                      Escribe los medicamentos que tomas tú para activar recordatorios y seguir tu adherencia.
+                    </Text>
+                  </View>
+                  <Icon name="plus" size={20} color={colors.lime} />
+                </Card>
+              </PressableScale>
+            </Animated.View>
+          ) : null}
+
+          {hasMeds ? (
           <Animated.View entering={FadeInDown.delay(240).duration(450)}>
             <PressableScale onPress={() => router.push('/medications')} accessibilityLabel="Ver adherencia a medicamentos">
               <Card style={styles.adherence}>
@@ -174,6 +194,7 @@ export default function Dashboard() {
               </Card>
             </PressableScale>
           </Animated.View>
+          ) : null}
 
           <Animated.View entering={FadeInDown.delay(300).duration(450)} style={styles.tiles}>
             <ActionTile icon="edit" label="Registro de hoy" sub="Sueño, estrés, cafeína" onPress={() => router.push('/daily-log')} />
