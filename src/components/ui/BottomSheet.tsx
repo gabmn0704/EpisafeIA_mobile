@@ -4,6 +4,7 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import Animated, { Easing, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { haptic } from '@/lib/haptics';
+import { sheetDragOffset, shouldDismissSheet } from '@/lib/sheetGesture';
 import { colors, motion, radius, space } from '@/theme/tokens';
 import { Text } from './Text';
 
@@ -40,10 +41,10 @@ export function BottomSheet({ visible, onClose, title, subtitle, children }: Bot
 
   const pan = Gesture.Pan()
     .onUpdate((e) => {
-      y.value = e.translationY > 0 ? e.translationY : e.translationY * 0.12;
+      y.value = sheetDragOffset(e.translationY);
     })
     .onEnd((e) => {
-      if (e.translationY > 110 || e.velocityY > 800) {
+      if (shouldDismissSheet(e.translationY, e.velocityY)) {
         runOnJS(onClose)();
       } else {
         y.value = withSpring(0, motion.spring);
