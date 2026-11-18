@@ -111,8 +111,8 @@ export default function Dashboard() {
 
           <Animated.View entering={FadeInDown.delay(180).duration(450)} style={styles.tiles}>
             <StatTile
-              label="Sin crisis"
-              value={d.seizureFreeStreakDays !== null ? String(d.seizureFreeStreakDays) : '--'}
+              label={d.seizureFreeStreakDays !== null ? 'Sin crisis' : 'Crisis'}
+              value={d.seizureFreeStreakDays !== null ? String(d.seizureFreeStreakDays) : 'Ninguna'}
               unit={d.seizureFreeStreakDays !== null ? (d.seizureFreeStreakDays === 1 ? 'día' : 'días') : undefined}
               caption={d.seizureFreeStreakDays !== null ? 'Racha actual' : 'Aún no registras crisis'}
               accessory={<Icon name="flame" size={22} color={colors.amber} />}
