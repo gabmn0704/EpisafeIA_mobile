@@ -7,9 +7,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BrandLoader } from '@/components/brand/BrandLoader';
 import { BrandIntro } from '@/components/brand/BrandIntro';
+import { useReminderActions } from '@/hooks/useReminderActions';
 import { WakeOverlay } from '@/components/ui/WakeOverlay';
 import { SosFloat } from '@/components/ui/SosFloat';
+import { AppLockProvider } from '@/providers/AppLockProvider';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { colors } from '@/theme/tokens';
@@ -29,6 +32,9 @@ function Routes() {
         <Stack.Screen name="insights" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="contacts" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="devices" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="medical-id" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="report" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="calendar" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="medication-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="seizure-form" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
@@ -45,6 +51,7 @@ function Routes() {
 function Shell() {
   const fontsReady = useAppFonts();
   const { status } = useAuth();
+  useReminderActions();
   const [introDone, setIntroDone] = useState(false);
   const finishIntro = useCallback(() => setIntroDone(true), []);
 
@@ -63,13 +70,15 @@ function Shell() {
   return (
     <>
       <StatusBar style="light" />
-      {status === 'loading' ? (
-        <View style={styles.loading}>
-          <BrandLoader />
-        </View>
-      ) : (
-        <Routes />
-      )}
+      <AppLockProvider>
+        {status === 'loading' ? (
+          <View style={styles.loading}>
+            <BrandLoader />
+          </View>
+        ) : (
+          <Routes />
+        )}
+      </AppLockProvider>
       <SosFloat />
       <WakeOverlay />
       {!introDone ? <BrandIntro onDone={finishIntro} /> : null}
@@ -83,9 +92,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>
-              <Shell />
-            </ToastProvider>
+            <OfflineQueueProvider>
+              <ToastProvider>
+                <Shell />
+              </ToastProvider>
+            </OfflineQueueProvider>
           </AuthProvider>
         </QueryProvider>
       </SafeAreaProvider>
