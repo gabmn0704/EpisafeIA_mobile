@@ -18,7 +18,7 @@ export interface ScreenProps {
 }
 
 /** Fondo con degradado violeta, resplandor de acento y margenes seguros. */
-export function Screen({ children, scroll = true, refreshing, onRefresh, bottomInset = 0, glow = colors.brandDeep, contentStyle }: ScreenProps) {
+export function Screen({ children, scroll = true, refreshing, onRefresh, bottomInset = 72, glow = colors.brandDeep, contentStyle }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const pad: ViewStyle = {
     paddingTop: insets.top + space.md,

@@ -29,7 +29,7 @@ const ITEMS: Item[] = [
 export default function More() {
   const { user } = useAuth();
   return (
-    <Screen bottomInset={90}>
+    <Screen bottomInset={112}>
       <Header title="Más" subtitle="Todo lo demás de EpiSafe" />
       <Animated.View entering={FadeInDown.duration(350)}>
         <PressableScale onPress={() => router.push('/settings')} accessibilityLabel="Abrir perfil">

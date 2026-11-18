@@ -50,3 +50,20 @@ export function mapsLink(latitude: number, longitude: number): string {
 export function telUrl(phone: string): string {
   return `tel:${phone.replace(/[^\d+]/g, '')}`;
 }
+
+/** Mensaje prellenado para SMS / WhatsApp: quien avisa, hora y mapa si hay ubicacion. */
+export function emergencyMessage(userName: string, when: Date, position?: { latitude: number; longitude: number } | null): string {
+  const hour = when.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  const base = `Necesito ayuda. Soy ${userName} y activé mi alerta de emergencia en EpiSafe a las ${hour}.`;
+  return position ? `${base} Mi ubicación: ${mapsLink(position.latitude, position.longitude)}` : base;
+}
+
+/** Enlace sms: con texto. iOS separa el cuerpo con "&", Android con "?". */
+export function smsUrl(phone: string, body: string, os: 'ios' | 'android' | 'web' = 'android'): string {
+  return `sms:${phone.replace(/[^\d+]/g, '')}${os === 'ios' ? '&' : '?'}body=${encodeURIComponent(body)}`;
+}
+
+/** Enlace de WhatsApp (wa.me exige el numero solo con digitos, sin "+"). */
+export function whatsappUrl(phone: string, body: string): string {
+  return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(body)}`;
+}

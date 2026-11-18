@@ -1,4 +1,4 @@
-import { COUNTDOWN_SECONDS, emergencyReducer, initialEmergency, mapsLink, telUrl, type EmergencyState } from './emergencyMachine';
+import { COUNTDOWN_SECONDS, emergencyMessage, emergencyReducer, initialEmergency, mapsLink, smsUrl, telUrl, whatsappUrl, type EmergencyState } from './emergencyMachine';
 
 describe('emergencyReducer', () => {
   it('starts a countdown and ticks down', () => {
@@ -43,6 +43,20 @@ describe('emergencyReducer', () => {
   });
 });
 
+describe('contact links', () => {
+  it('builds a message with the map link only when there is a position', () => {
+    const at = new Date(2026, 10, 17, 9, 5);
+    expect(emergencyMessage('Laura', at)).toContain('Soy Laura');
+    expect(emergencyMessage('Laura', at)).not.toContain('maps');
+    expect(emergencyMessage('Laura', at, { latitude: 4.7, longitude: -74.1 })).toContain('https://maps.google.com/?q=4.700000,-74.100000');
+  });
+  it('builds sms and whatsapp urls', () => {
+    expect(smsUrl('+57 300 1', 'hola mundo', 'ios')).toBe('sms:+573001&body=hola%20mundo');
+    expect(smsUrl('+57 300 1', 'hola', 'android')).toBe('sms:+573001?body=hola');
+    expect(whatsappUrl('+57 (300) 123', 'a b')).toBe('https://wa.me/57300123?text=a%20b');
+  });
+});
+
 describe('helpers', () => {
   it('builds a maps link with fixed precision', () => {
     expect(mapsLink(4.711, -74.0721)).toBe('https://maps.google.com/?q=4.711000,-74.072100');
@@ -50,5 +64,20 @@ describe('helpers', () => {
 
   it('sanitizes phone numbers for tel: links', () => {
     expect(telUrl('+57 (300) 123-4567')).toBe('tel:+573001234567');
+  });
+});
+
+describe('contact links', () => {
+  it('builds a message with the map link only when there is a position', () => {
+    const at = new Date(2026, 10, 17, 9, 5);
+    expect(emergencyMessage('Laura', at)).toContain('Soy Laura');
+    expect(emergencyMessage('Laura', at)).not.toContain('maps');
+    expect(emergencyMessage('Laura', at, { latitude: 4.7, longitude: -74.1 })).toContain('https://maps.google.com/?q=4.700000,-74.100000');
+  });
+
+  it('builds sms and whatsapp urls', () => {
+    expect(smsUrl('+57 300 1', 'hola mundo', 'ios')).toBe('sms:+573001&body=hola%20mundo');
+    expect(smsUrl('+57 300 1', 'hola', 'android')).toBe('sms:+573001?body=hola');
+    expect(whatsappUrl('+57 (300) 123', 'a b')).toBe('https://wa.me/57300123?text=a%20b');
   });
 });

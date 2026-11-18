@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Switch, View } from 'react-native';
+import { BottomSheet, useSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Header } from '@/components/ui/Header';
@@ -16,6 +17,7 @@ import { colors, space } from '@/theme/tokens';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
+  const logoutSheet = useSheet();
   const meds = useMedications();
   const toast = useToast();
   const [reminders, setReminders] = useState(true);
@@ -91,17 +93,23 @@ export default function Settings() {
           EpiSafe IA es una herramienta de apoyo y no reemplaza la atención médica. Ante una crisis prolongada llama a emergencias.
         </Text>
 
-        <Button
-          label="Cerrar sesión"
-          variant="ghost"
-          icon="logout"
-          loading={busy}
-          onPress={async () => {
-            setBusy(true);
-            await cancelAllReminders();
-            await signOut();
-          }}
-        />
+        <Button label="Cerrar sesión" variant="ghost" icon="logout" onPress={logoutSheet.show} />
+        <BottomSheet visible={logoutSheet.open} onClose={logoutSheet.hide} title="¿Cerrar sesión?" subtitle="Dejarás de recibir recordatorios de medicación en este teléfono hasta que vuelvas a entrar.">
+          <View style={{ gap: space.md }}>
+            <Button
+              label="Cerrar sesión"
+              variant="danger"
+              icon="logout"
+              loading={busy}
+              onPress={async () => {
+                setBusy(true);
+                await cancelAllReminders();
+                await signOut();
+              }}
+            />
+            <Button label="Mejor me quedo" variant="soft" onPress={logoutSheet.hide} />
+          </View>
+        </BottomSheet>
       </View>
     </Screen>
   );
