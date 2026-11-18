@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { OfflineQueueProvider } from '@/providers/OfflineQueueProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { WearableProvider } from '@/providers/WearableProvider';
@@ -65,9 +66,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryProvider>
           <AuthProvider>
-            <ToastProvider>
-              <Shell />
-            </ToastProvider>
+            <OfflineQueueProvider>
+              <ToastProvider>
+                <Shell />
+              </ToastProvider>
+            </OfflineQueueProvider>
           </AuthProvider>
         </QueryProvider>
       </SafeAreaProvider>
