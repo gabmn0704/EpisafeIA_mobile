@@ -18,7 +18,9 @@ interface OfflineValue {
 const OfflineContext = createContext<OfflineValue>({ pending: 0, syncing: false, enqueue: async () => undefined, syncNow: async () => undefined });
 
 function send(item: PendingItem): Promise<unknown> {
-  return item.kind === 'seizure' ? endpoints.seizures.create(item.payload) : endpoints.dailyLogs.upsert(item.date, item.payload);
+  if (item.kind === 'seizure') return endpoints.seizures.create(item.payload);
+  if (item.kind === 'dose') return endpoints.medications.logDose(item.payload.medicationId, item.payload.scheduledFor, item.payload.status);
+  return endpoints.dailyLogs.upsert(item.date, item.payload);
 }
 
 /** Guarda localmente lo que no se pudo enviar y lo reintenta solo (cada 20 s y al volver a la app). */
@@ -49,7 +51,7 @@ export function OfflineQueueProvider({ children }: { children: ReactNode }) {
     try {
       const res = await q.flush(async (item) => void (await send(item)));
       if (res.sent > 0) {
-        await Promise.all(['seizures', 'dailyLog', 'dailyLogs', 'dashboard', 'risk'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+        await Promise.all(['seizures', 'dailyLog', 'dailyLogs', 'dashboard', 'risk', 'doses', 'adherence'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
       }
     } finally {
       setSyncing(false);

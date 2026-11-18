@@ -79,6 +79,14 @@ describe('OfflineQueue', () => {
     expect(seen).toEqual([0, 1, 0]);
   });
 
+  it('encola tomas de medicación sin reemplazarlas', async () => {
+    const q = new OfflineQueue('k', memoryStore());
+    const dose = { medicationId: 'm1', scheduledFor: '2026-11-01T13:00:00.000Z', status: 'taken' as const };
+    await q.enqueue({ kind: 'dose', payload: dose });
+    await q.enqueue({ kind: 'dose', payload: { ...dose, scheduledFor: '2026-11-01T20:00:00.000Z' } });
+    expect(q.count).toBe(2);
+  });
+
   it('isRetryable distingue red/5xx de 4xx', () => {
     expect(isRetryable(net())).toBe(true);
     expect(isRetryable(new ApiError(503, 'INTERNAL_ERROR', 'x'))).toBe(true);

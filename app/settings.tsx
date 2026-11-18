@@ -9,7 +9,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useMedications } from '@/hooks/queries';
 import { API_URL } from '@/lib/config';
-import { cancelAllReminders, ensureNotificationPermission, syncMedicationReminders } from '@/lib/notifications';
+import { askReminderPermission, cancelAllReminders, syncMedicationReminders } from '@/lib/notifications';
 import { prefs } from '@/lib/prefs';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
@@ -34,7 +34,7 @@ export default function Settings() {
       await cancelAllReminders();
       return toast.show('Recordatorios desactivados');
     }
-    const granted = await ensureNotificationPermission();
+    const granted = await askReminderPermission();
     if (!granted) {
       toast.show({ message: 'Activa las notificaciones de EpiSafe en los ajustes del teléfono.', tone: 'warning', durationMs: 5000 });
       return;

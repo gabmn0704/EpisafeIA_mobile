@@ -1,11 +1,22 @@
 import { ApiError } from '@/lib/api/errors';
 import type { DailyLogInput, SeizureInput } from '@/lib/api/endpoints';
+import type { MedicationStatus } from '@/lib/api/schemas';
+
+export interface DosePayload {
+  medicationId: string;
+  scheduledFor: string;
+  status: MedicationStatus;
+}
 
 export type PendingItem =
   | { id: string; kind: 'seizure'; createdAt: string; payload: SeizureInput }
-  | { id: string; kind: 'dailyLog'; createdAt: string; payload: DailyLogInput; date: string };
+  | { id: string; kind: 'dailyLog'; createdAt: string; payload: DailyLogInput; date: string }
+  | { id: string; kind: 'dose'; createdAt: string; payload: DosePayload };
 
-export type NewPendingItem = { kind: 'seizure'; payload: SeizureInput } | { kind: 'dailyLog'; payload: DailyLogInput; date: string };
+export type NewPendingItem =
+  | { kind: 'seizure'; payload: SeizureInput }
+  | { kind: 'dailyLog'; payload: DailyLogInput; date: string }
+  | { kind: 'dose'; payload: DosePayload };
 
 export interface KeyValueStore {
   getItem(key: string): Promise<string | null>;
