@@ -18,9 +18,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "app.episafe.mobile",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "EpiSafe IA usa tu ubicacion solo cuando activas una emergencia, para avisar a tus contactos donde estas.",
-        "NSBluetoothAlwaysUsageDescription": "EpiSafe IA se conecta por Bluetooth a tu reloj o banda para leer tu pulso.",
-        "UIBackgroundModes": ["bluetooth-central"]
+        "NSLocationWhenInUseUsageDescription": "EpiSafe IA usa tu ubicacion solo cuando activas una emergencia, para avisar a tus contactos donde estas."
       }
     },
     "android": {
@@ -34,8 +32,6 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "BLUETOOTH_SCAN",
-        "BLUETOOTH_CONNECT",
         "POST_NOTIFICATIONS",
         "VIBRATE"
       ],
@@ -52,25 +48,21 @@
       "expo-font",
       [
         "expo-notifications",
-        { "color": "#8a63ff" }
+        {
+          "color": "#8a63ff"
+        }
       ],
       [
         "expo-location",
         {
           "locationWhenInUsePermission": "EpiSafe IA usa tu ubicacion solo cuando activas una emergencia."
         }
-      ],
-      [
-        "react-native-ble-plx",
-        {
-          "isBackgroundEnabled": false,
-          "modes": ["central"],
-          "bluetoothAlwaysPermission": "EpiSafe IA se conecta por Bluetooth a tu reloj o banda para leer tu pulso."
-        }
       ]
     ],
     "extra": {
-      "eas": { "projectId": "21065e5c-9c93-4295-957e-76a2930ebe7c" }
+      "eas": {
+        "projectId": "21065e5c-9c93-4295-957e-76a2930ebe7c"
+      }
     },
     "owner": "gabmnn"
   }

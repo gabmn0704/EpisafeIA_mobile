@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { PulseHeart } from '@/components/dashboard/PulseHeart';
 import { FactorRow } from '@/components/dashboard/FactorRow';
 import { StatTile } from '@/components/dashboard/StatTile';
 import { Ring } from '@/components/charts/Ring';
@@ -20,13 +19,6 @@ import { useDashboard, useMedications, useRiskHistory } from '@/hooks/queries';
 import { formatDateLong, greeting, timeAgo } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, riskPalette, space } from '@/theme/tokens';
-
-const ALERT_COPY: Record<string, string> = {
-  tachycardia: 'Taquicardia sostenida',
-  motion_convulsive: 'Movimiento convulsivo',
-  hr_anomaly: 'Pulso fuera de lo habitual',
-  fall: 'Posible caída',
-};
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -75,25 +67,6 @@ export default function Dashboard() {
         <QueryError error={dash.error} onRetry={() => void dash.refetch()} />
       ) : (
         <View style={{ gap: space.lg }}>
-          {d.activeAlerts.count > 0 ? (
-            <Animated.View entering={FadeInDown.duration(350)}>
-              <PressableScale onPress={() => router.push('/devices')} accessibilityLabel="Ver alertas del reloj">
-                <Card tone="danger" style={styles.alert}>
-                  <Icon name="alert" size={22} color={colors.coral} />
-                  <View style={{ flex: 1 }}>
-                    <Text variant="title" color={colors.coral}>
-                      {d.activeAlerts.count === 1 ? 'Alerta del reloj' : `${d.activeAlerts.count} alertas del reloj`}
-                    </Text>
-                    <Text variant="small" color={colors.ink}>
-                      {d.activeAlerts.items[0] ? `${ALERT_COPY[d.activeAlerts.items[0].kind] ?? 'Alerta'} · ${timeAgo(d.activeAlerts.items[0].detectedAt)}` : 'Revisa tu reloj'}
-                    </Text>
-                  </View>
-                  <Icon name="chevronRight" size={20} color={colors.coral} />
-                </Card>
-              </PressableScale>
-            </Animated.View>
-          ) : null}
-
           <Animated.View entering={FadeInDown.delay(60).duration(450)}>
             <PressableScale onPress={sheet.show} accessibilityLabel="Ver cómo se calcula tu riesgo" pressedScale={0.985}>
             <View style={[styles.hero, { borderColor: palette.color }]}>
@@ -137,14 +110,6 @@ export default function Dashboard() {
           ) : null}
 
           <Animated.View entering={FadeInDown.delay(180).duration(450)} style={styles.tiles}>
-            <StatTile
-              label="Pulso"
-              value={d.currentHeartRate !== null ? String(d.currentHeartRate) : '--'}
-              unit={d.currentHeartRate !== null ? 'lpm' : undefined}
-              caption={d.currentHeartRate !== null ? 'Último dato del reloj' : 'Sin reloj conectado'}
-              accessory={<PulseHeart bpm={d.currentHeartRate} />}
-              onPress={() => router.push('/devices')}
-            />
             <StatTile
               label="Sin crisis"
               value={d.seizureFreeStreakDays !== null ? String(d.seizureFreeStreakDays) : '--'}
@@ -208,7 +173,7 @@ export default function Dashboard() {
           ) : null}
         </View>
       )}
-      <BottomSheet visible={sheet.open} onClose={sheet.hide} title="Cómo se calcula" subtitle="La IA cruza lo que registras con lo que mide tu reloj. No es un diagnóstico.">
+      <BottomSheet visible={sheet.open} onClose={sheet.hide} title="Cómo se calcula" subtitle="La IA cruza lo que registras con tus hábitos, tu sueño y tu medicación. No es un diagnóstico.">
         <View style={{ gap: space.lg }}>
           {(d?.risk.factors ?? []).map((f, i) => (
             <FactorRow key={f.name} factor={f} index={i} />
@@ -240,7 +205,6 @@ function ActionTile({ icon, label, sub, onPress }: { icon: 'edit' | 'sparkles'; 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.xl },
   avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.lime, alignItems: 'center', justifyContent: 'center' },
-  alert: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   hero: { borderRadius: 32, borderWidth: 1, overflow: 'hidden', backgroundColor: colors.surface, paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.xl, alignItems: 'center' },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'stretch', marginBottom: space.sm },
   liveDot: { width: 8, height: 8, borderRadius: 4 },

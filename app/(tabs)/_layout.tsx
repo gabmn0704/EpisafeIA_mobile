@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Text } from '@/components/ui/Text';
-import { useAlertWatcher } from '@/hooks/useAlertWatcher';
 import { useReminderSync } from '@/hooks/useReminderSync';
 import { haptic } from '@/lib/haptics';
 import { colors, shadow } from '@/theme/tokens';
@@ -55,7 +54,6 @@ function TabItem({ icon, label, isFocused, onPress, ...rest }: TabItemProps) {
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   useReminderSync();
-  useAlertWatcher();
   return (
     <Tabs>
       <TabSlot style={{ flex: 1 }} />

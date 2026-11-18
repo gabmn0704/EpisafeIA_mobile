@@ -9,7 +9,6 @@ import { SosFloat } from '@/components/ui/SosFloat';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
-import { WearableProvider } from '@/providers/WearableProvider';
 import { colors } from '@/theme/tokens';
 import { useAppFonts } from '@/theme/useAppFonts';
 
@@ -53,10 +52,8 @@ function Shell() {
   return (
     <>
       <StatusBar style="light" />
-      <WearableProvider>
-        <Routes />
-        <SosFloat />
-      </WearableProvider>
+      <Routes />
+      <SosFloat />
     </>
   );
 }
