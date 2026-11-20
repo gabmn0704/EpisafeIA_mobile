@@ -1,11 +1,56 @@
 export type WhenPreset = 'now' | '1h' | '3h' | 'yesterday';
 
-export const WHEN_LABELS: Record<WhenPreset, string> = {
+/** Las opciones rápidas más "Otra fecha", que abre el selector de fecha y hora para crisis pasadas. */
+export type WhenChoice = WhenPreset | 'custom';
+
+export const WHEN_LABELS: Record<WhenChoice, string> = {
   now: 'Ahora',
   '1h': 'Hace 1 h',
   '3h': 'Hace 3 h',
   yesterday: 'Ayer',
+  custom: 'Otra fecha',
 };
+
+export const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] as const;
+
+/** Fecha y hora elegidas a mano para una crisis pasada (hora local del teléfono; mes de 1 a 12). */
+export interface CustomWhen {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
+export function customWhenFrom(date: Date): CustomWhen {
+  return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate(), hour: date.getHours(), minute: date.getMinutes() };
+}
+
+export function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+/** Corrige el día si el mes o el año elegidos no lo permiten (31 de febrero pasa a 28 o 29). */
+export function clampCustomWhen(w: CustomWhen): CustomWhen {
+  return { ...w, day: Math.min(w.day, daysInMonth(w.year, w.month)) };
+}
+
+export function startedAtFromCustom(w: CustomWhen): string {
+  const c = clampCustomWhen(w);
+  return new Date(c.year, c.month - 1, c.day, c.hour, c.minute).toISOString();
+}
+
+export function isFuture(iso: string, now: Date = new Date()): boolean {
+  return Date.parse(iso) > now.getTime();
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** "12 de marzo de 2026, 14:30" */
+export function formatCustomWhen(w: CustomWhen): string {
+  const c = clampCustomWhen(w);
+  return `${c.day} de ${MONTH_NAMES[c.month - 1]} de ${c.year}, ${pad2(c.hour)}:${pad2(c.minute)}`;
+}
 
 /** Instante de inicio de la crisis según el preset elegido (ayer = mismo instante, 24 h antes). */
 export function startedAtFor(preset: WhenPreset, now: Date = new Date()): string {
@@ -31,9 +76,8 @@ export function severityTone(severity: number | null): 'low' | 'mid' | 'high' | 
 
 /** Agrupa por mes para la línea de tiempo: "noviembre 2026". */
 export function monthLabel(iso: string): string {
-  const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   const d = new Date(iso);
-  return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export function groupByMonth<T extends { startedAt: string }>(items: readonly T[]): { label: string; items: T[] }[] {

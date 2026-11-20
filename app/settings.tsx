@@ -104,7 +104,7 @@ export default function Settings() {
             API: {API_URL}
           </Text>
           <Text variant="small" color={colors.faint}>
-            Versión {Constants.expoConfig?.version ?? '1.0.0'}
+            Versión {Constants.expoConfig?.version ?? '1.1'}
           </Text>
         </Card>
 
